@@ -1,0 +1,20 @@
+.react-calendar .react-calendar__tile--hover {
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+  /* Style selected calendar date cell */
+.react-calendar .react-calendar__tile--active {
+    background-color: #3490dc;
+    color: white;
+}
+
+/* Custom styles for the calendar */
+.custom-calendar {
+    width: 250px; /* Adjust the width as needed */
+}
+
+.break-word {
+    word-wrap: break-word; /* ให้ข้อความตัดคำตามขอบเขตของพื้นที่ */
+    white-space: normal; /* ให้ข้อความขึ้นบรรทัดใหม่ */
+}

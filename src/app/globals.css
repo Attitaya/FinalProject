@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root{
+    --color-red: #F84646;
+    --color-green: #66CC42;
+    --color-gray: #9e9fa1;
+    --color-white: #fafaf9;
+    --color-black: #000000;
+    --color-blue: #374785;
+    --color-light-blue: #99acf1;
+  }
+}
+    
+
+    * {
+      font-family: "TH Sarabun New";
+      font-size: 24px;
+    }
+    
+    html {
+      font-family: var(--font-sarabun);
+    }
+    
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    
+    .main-content {
+      min-height: calc(100vh - 252px);
+    }
