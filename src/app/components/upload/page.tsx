@@ -7,7 +7,8 @@ import { CgCheck, CgClose, CgChevronDoubleLeft, CgChevronDoubleRight, CgChevronR
 import Calendar from "react-calendar";
 import "./upload.css";
 import { MdPlayCircleFilled, MdPauseCircleFilled, MdDone, MdDelete } from "react-icons/md";
-import Link from 'next/link'
+import Link from 'next/link';
+
 function Upload() {
     const [selectedFile, setSelectedFile] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
@@ -77,7 +78,14 @@ function Upload() {
                 setUploadError("File with the same name already exists on the selected date.");
                 return;
             }
-                    // Set uploading status
+
+                // Check if the comment is empty
+            if (comment.trim() === "") {
+                setUploadError("Please provide a comment for the file.");
+                return;
+            }
+            
+            // Set uploading status
             setUploading(true);
     
             // Perform file upload logic here
@@ -176,152 +184,141 @@ function Upload() {
 
     return (
         <div className="flex flex-col pl-2 pr-2 pt-3 md:pl-8 md:pr-8"> 
-        <div className="flex flex-row justify-between">
-            <button
-            onClick={() => setIsOpen(true)}
-            className="font-bold bg-red text-black px-9 rounded-md"
-            >
-            Upload
-            </button>
-            <SearchBar onSearch={handleSearch} />
+            <div className="flex flex-row justify-between">
+                <button
+                onClick={() => setIsOpen(true)}
+                className="font-bold bg-red text-black px-9 rounded-md"
+                >
+                Upload
+                </button>
+                <SearchBar onSearch={handleSearch} />
             </div>
-            {reversedUploadedFiles.sort((a, b) => b.date - a.date).slice((currentPage - 1) * filesPerPage, currentPage * filesPerPage).map((file, index) => {
-                const reversedIndex = reversedUploadedFiles.length - 1 - index;
-                return (
-                    <div key={reversedIndex} className="mt-4 bg-light-blue rounded-md p-2 font-bold flex flex-col md:flex-row"> {/* เพิ่ม md:flex-row เพื่อให้บรรจุเนื้อหาในแนวนอนในจอใหญ่ */}
-                        <div className="flex flex-col justify-start md:w-1/2">
-                            <p className="mb-1">File : {file.file.name}</p>
-                            <p className="mb-1">Date : {file.date.toLocaleDateString()}</p>
-                            <p className="mb-1">Comment : <span className="break-word">{file.comment}</span></p>
-                        </div>
-                        <div className="md:flex justify-center items-center md:w-1/2">
-                            <audio controls src={URL.createObjectURL(file.file)} />
-                            <div className="md:ml-5 md:mt-0 mt-4"> {/* เพิ่มระยะห่างและความชิดซ้ายเมื่อในจอใหญ่ */}
-                                <Link href="/summary"
-                                    className="bg-blue text-white px-3 py-1 rounded"
-                                >
-                                    Summarize
-                                </Link> 
-                                <button
-                                    className="bg-red text-white px-3 py-1 rounded"
-                                    onClick={() => handleDelete(index)} // Call the delete function on click
-                                >
-                                    Delete <MdDelete className="inline-block ml-1" />
-                                </button>
+                {reversedUploadedFiles.sort((a, b) => b.date - a.date).slice((currentPage - 1) * filesPerPage, currentPage * filesPerPage).map((file, index) => {
+                    const reversedIndex = reversedUploadedFiles.length - 1 - index;
+                    return (
+                        <div key={reversedIndex} className="mt-4 bg-light-blue rounded-md p-2 font-bold flex flex-col md:flex-row"> {/* เพิ่ม md:flex-row เพื่อให้บรรจุเนื้อหาในแนวนอนในจอใหญ่ */}
+                            <div className="flex flex-col justify-start md:w-1/2">
+                                <p className="mb-1">File : {file.file.name}</p>
+                                <p className="mb-1">Date : {file.date.toLocaleDateString()}</p>
+                                <p className="mb-1">Comment : <span className="break-word">{file.comment}</span></p>
                             </div>
-                            {/* {processing && (
-                                <div className="text-green-500">
-                                    <i className="fas fa-check-circle mr-1"></i>
-                                    Processing completed
+                            <div className="md:flex justify-center items-center md:w-1/2">
+                                <audio controls src={URL.createObjectURL(file.file)} />
+                                <div className="md:ml-5 md:mt-0 mt-4"> {/* เพิ่มระยะห่างและความชิดซ้ายเมื่อในจอใหญ่ */}
+                                    <Link href="/summary" passHref={true} legacyBehavior>
+                                        <a className="bg-blue text-white px-3 py-1 rounded">Summarize</a>
+                                    </Link>
+                                    <button
+                                        className="bg-red text-white px-3 py-1 rounded"
+                                        onClick={() => handleDelete(index)} // Call the delete function on click
+                                    >
+                                        Delete <MdDelete className="inline-block ml-1" />
+                                    </button>
                                 </div>
-                            )} */}
+                                {/* {processing && (
+                                    <div className="text-green-500">
+                                        <i className="fas fa-check-circle mr-1"></i>
+                                        Processing completed
+                                    </div>
+                                )} */}
+                            </div>
                         </div>
-                    </div>
-                );
-            })}
-            <Dialog open={isOpen} onClose={() => {
-                if (audioInstancePlaying) {
-                    audioInstancePlaying.pause();
-                }
-                setIsPlaying(false);
-                setIsOpen(false);
-            }}>
-                <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
-                <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded shadow-md">
-                    <Dialog.Title className="text-lg font-bold mb-2">
-                        Select file to upload
-                    </Dialog.Title>
-                    <input type="file" onChange={handleFileChange} accept="audio/*" />
-                    {uploadError && <p className="text-red">{uploadError}</p>}
-                    <div className="flex flex-row justify-between">
-                        <Calendar
-                        onChange={handleDateChange}
-                        value={selectedDate}
-                        tileClassName={({ date, view }) =>
-                            view === 'month' &&
-                            `react-calendar__tile--hover ${
-                            date.getDate() === selectedDate.getDate() &&
-                            date.getMonth() === selectedDate.getMonth() &&
-                            date.getYear() === selectedDate.getYear()
-                                ? 'react-calendar__tile--active'
-                                : ''
-                            }`
+                    );
+                })}
+                <Dialog
+                    open={isOpen}
+                    onClose={() => {
+                        if (audioInstancePlaying) {
+                            audioInstancePlaying.pause();
                         }
-                        className="justify-start p-2 custom-calendar"
-                        />
-                        <textarea
-                            placeholder="comment"
-                            className="m-1 resize-none border-dashed border-2 rounded-md p-2"
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)} // Update the comment state
-                        ></textarea>
+                        setIsPlaying(false);
+                        setIsOpen(false);
+                    }}
+                    className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded shadow-md"
+                    style={{ zIndex: 1000 }} // Set a higher z-index value
+                >
+                    <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
+                    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded shadow-md">
+                        <Dialog.Title className="text-lg font-bold mb-2">
+                            Select file to upload
+                        </Dialog.Title>
+                        <input type="file" onChange={handleFileChange} accept="audio/*" />
+                        {uploadError && <p className="text-red">{uploadError}</p>}
+                        <div className="flex flex-row justify-between">
+                            <Calendar
+                            onChange={handleDateChange}
+                            value={selectedDate}
+                            tileClassName={({ date, view }) =>
+                                view === 'month' &&
+                                `react-calendar__tile--hover ${
+                                date.getDate() === selectedDate.getDate() &&
+                                date.getMonth() === selectedDate.getMonth() &&
+                                date.getYear() === selectedDate.getYear()
+                                    ? 'react-calendar__tile--active'
+                                    : ''
+                                }`
+                            }
+                            className="justify-start p-2 custom-calendar"
+                            />
+                            <textarea
+                                placeholder="comment"
+                                className="m-1 resize-none border-dashed border-2 rounded-md p-2"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)} // Update the comment state
+                            ></textarea>
+                        </div>
+                    <div className="mt-4 flex justify-between">
+                        <button
+                            onClick={handleUpload}
+                            className={`${
+                                uploading ? "bg-gray-300" : "bg-green"
+                            } text-black px-3 py-1 rounded mr-2`}
+                            disabled={uploading}
+                        >
+                            {uploading ? "Uploading..." : "Submit"}{" "}
+                            {uploading ? (
+                                <MdPauseCircleFilled className="inline-block ml-1" />
+                            ) : (
+                                <CgCheck className="inline-block ml-1" />
+                            )}
+                        </button>
+                        <button
+                            onClick={resetForm}
+                            className="bg-red text-black px-3 py-1 rounded"
+                        >
+                            Cancel <CgClose className="inline-block ml-1" />
+                        </button>
                     </div>
-                <div className="mt-4 flex justify-between">
-                    <button
-                        onClick={handleUpload}
-                        className={`${
-                            uploading ? "bg-gray-300" : "bg-green"
-                        } text-black px-3 py-1 rounded mr-2`}
-                        disabled={uploading}
-                    >
-                        {uploading ? "Uploading..." : "Submit"}{" "}
-                        {uploading ? (
-                            <MdPauseCircleFilled className="inline-block ml-1" />
-                        ) : (
-                            <CgCheck className="inline-block ml-1" />
-                        )}
-                    </button>
-                    <button
-                        onClick={resetForm}
-                        className="bg-red text-black px-3 py-1 rounded"
-                    >
-                        Cancel <CgClose className="inline-block ml-1" />
-                    </button>
-                </div>
 
-                {/* Success and error messages */}
-                {successMessage && <p className="text-green">{successMessage}</p>}
-                {errorMessage && <p className="text-red">{errorMessage}</p>}
-                </div>
-            </Dialog>
-            {totalPages > 1 && (
-                <div className="flex flex-row md:flex-row justify-center mt-4">
-                    {/* First page */}
-                    <button
-                        onClick={() => goToPage(1)}
-                        disabled={currentPage === 1}
-                        className="text-black px-3 py-1 rounded mx-1"
-                    >
-                        <CgChevronDoubleLeft />
-                    </button>
+                    {/* Success and error messages */}
+                    {successMessage && <p className="text-green">{successMessage}</p>}
+                    {errorMessage && <p className="text-red">{errorMessage}</p>}
+                    </div>
+                </Dialog>
+                {totalPages > 1 && (
+                    <div className="flex flex-row md:flex-row justify-center mt-4">
+                        {/* First page */}
+                        <button
+                            onClick={() => goToPage(1)}
+                            disabled={currentPage === 1}
+                            className="text-black px-3 py-1 rounded mx-1"
+                        >
+                            <CgChevronDoubleLeft />
+                        </button>
 
-                    {/* Previous page */}
-                    <button
-                        onClick={() => goToPage(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className="text-black px-3 py-1 rounded mx-1"
-                    >
-                        <CgChevronLeft />
-                    </button>
+                        {/* Previous page */}
+                        <button
+                            onClick={() => goToPage(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className="text-black px-3 py-1 rounded mx-1"
+                        >
+                            <CgChevronLeft />
+                        </button>
 
-                    {/* Page numbers */}
-                    {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => {
-                        if (totalPages <= 3) {
-                            // Display all pages if there are 3 or fewer pages
-                            return (
-                                <button
-                                    key={page}
-                                    onClick={() => goToPage(page)}
-                                    className={`${
-                                        page === currentPage ? "border text-black" : "text-black"
-                                    } px-3 py-1 rounded mx-1`}
-                                >
-                                    {page}
-                                </button>
-                            );
-                        } else {
-                            // Display only the first page, last page, and ellipsis for intermediate pages
-                            if (page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
+                        {/* Page numbers */}
+                        {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => {
+                            if (totalPages <= 3) {
+                                // Display all pages if there are 3 or fewer pages
                                 return (
                                     <button
                                         key={page}
@@ -333,38 +330,52 @@ function Upload() {
                                         {page}
                                     </button>
                                 );
-                            } else if (
-                                (page === currentPage - 2 && currentPage > 3) ||
-                                (page === currentPage + 2 && currentPage < totalPages - 2)
-                            ) {
-                                return (
-                                    <span key={page} className="px-3 py-1 mx-1">
-                                        ...
-                                    </span>
-                                );
+                            } else {
+                                // Display only the first page, last page, and ellipsis for intermediate pages
+                                if (page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
+                                    return (
+                                        <button
+                                            key={page}
+                                            onClick={() => goToPage(page)}
+                                            className={`${
+                                                page === currentPage ? "border text-black" : "text-black"
+                                            } px-3 py-1 rounded mx-1`}
+                                        >
+                                            {page}
+                                        </button>
+                                    );
+                                } else if (
+                                    (page === currentPage - 2 && currentPage > 3) ||
+                                    (page === currentPage + 2 && currentPage < totalPages - 2)
+                                ) {
+                                    return (
+                                        <span key={page} className="px-3 py-1 mx-1">
+                                            ...
+                                        </span>
+                                    );
+                                }
                             }
-                        }
-                    })}
+                        })}
 
-                    {/* Next page */}
-                    <button
-                        onClick={() => goToPage(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className="text-black px-3 py-1 rounded mx-1"
-                    >
-                        <CgChevronRight />
-                    </button>
+                        {/* Next page */}
+                        <button
+                            onClick={() => goToPage(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className="text-black px-3 py-1 rounded mx-1"
+                        >
+                            <CgChevronRight />
+                        </button>
 
-                    {/* Last page */}
-                    <button
-                        onClick={() => goToPage(totalPages)}
-                        disabled={currentPage === totalPages}
-                        className="text-black px-3 py-1 rounded mx-1"
-                    >
-                        <CgChevronDoubleRight />
-                    </button>
-                </div>
-            )}
+                        {/* Last page */}
+                        <button
+                            onClick={() => goToPage(totalPages)}
+                            disabled={currentPage === totalPages}
+                            className="text-black px-3 py-1 rounded mx-1"
+                        >
+                            <CgChevronDoubleRight />
+                        </button>
+                    </div>
+                )}
         </div>
     );
 }
