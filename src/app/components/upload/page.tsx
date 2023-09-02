@@ -79,12 +79,6 @@ function Upload() {
                 return;
             }
 
-                // Check if the comment is empty
-            if (comment.trim() === "") {
-                setUploadError("Please provide a comment for the file.");
-                return;
-            }
-            
             // Set uploading status
             setUploading(true);
     
@@ -126,7 +120,7 @@ function Upload() {
                 resetForm();
     
                 // Set success message
-                setSuccessMessage("File uploaded successfully.");
+                // setSuccessMessage("File uploaded successfully.");
                 
                 // Set page to 1 to stay on the first page after upload
                 setPage(1);
