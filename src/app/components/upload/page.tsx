@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Dialog } from "@headlessui/react";
-import SearchBar from "./search";
+import SearchBar from "../search";
 import { CgCheck, CgClose, CgChevronDoubleLeft, CgChevronDoubleRight, CgChevronRight, CgChevronLeft } from "react-icons/cg";
 import Calendar from "react-calendar";
 import "./upload.css";
@@ -28,6 +28,7 @@ function Upload() {
     const [page, setPage] = useState(1);
     const filesPerPage = 5;
     const [currentPage, setCurrentPage] = useState(1);
+    const [searchResults, setSearchResults] = useState([]);
 
     const totalPages = Math.ceil(uploadedFiles.length / filesPerPage);
     const reversedUploadedFiles = uploadedFiles.slice().reverse(); // Reverse the uploaded files array
@@ -136,10 +137,23 @@ function Upload() {
         }
     };
 
-    const handleSearch = (query) => {
-    // Implement your search logic here using the query
-        console.log("Searching for:", query);
+    const handleSearch = (searchText) => {
+        // ทำการค้นหาจากข้อมูลที่คุณมี (ในกรณีนี้ไม่มี API)
+        // ตัวอย่างเท่านี้เพียงเฉพาะการแสดงผลแบบซัมเมอร์เท่านั้น
+        // คุณสามารถเชื่อมต่อ API จริงเพื่อดึงข้อมูลตามที่ต้องการ
+        const fakeData = [
+            { id: 1, title: 'CgSearch 1' },
+            { id: 2, title: 'CgSearch 2' },
+            { id: 3, title: 'CgSearch 3' },
+        ];
+    
+        const results = fakeData.filter((item) =>
+            item.title.toLowerCase().includes(searchText.toLowerCase())
+        );
+    
+        setSearchResults(results);
     };
+    
 
     const handleDateChange = (date) => {
         setSelectedDate(date);
@@ -179,13 +193,22 @@ function Upload() {
     return (
         <div className="flex flex-col pl-2 pr-2 pt-3 md:pl-8 md:pr-8"> 
             <div className="flex flex-row justify-between">
-                <button
-                onClick={() => setIsOpen(true)}
-                className="font-bold bg-red text-black px-9 rounded-md"
-                >
-                Upload
-                </button>
-                <SearchBar onSearch={handleSearch} />
+                <div>
+                    <button
+                    onClick={() => setIsOpen(true)}
+                    className="font-bold bg-red text-black px-9 rounded-md py-2"
+                    >
+                    Upload
+                    </button>
+                </div>
+                <div>
+                    <SearchBar onSearch={handleSearch} />
+                    <ul>
+                        {searchResults.map((result) => (
+                        <li key={result.id}>{result.title}</li>
+                        ))}
+                    </ul>
+                </div>
             </div>
                 {reversedUploadedFiles.sort((a, b) => b.date - a.date).slice((currentPage - 1) * filesPerPage, currentPage * filesPerPage).map((file, index) => {
                     const reversedIndex = reversedUploadedFiles.length - 1 - index;
@@ -198,12 +221,12 @@ function Upload() {
                             </div>
                             <div className="md:flex justify-center items-center md:w-1/2">
                                 <audio controls src={URL.createObjectURL(file.file)} />
-                                <div className="md:ml-5 md:mt-0 mt-4"> {/* เพิ่มระยะห่างและความชิดซ้ายเมื่อในจอใหญ่ */}
+                                <div className="md:ml-5 md:mt-0 mt-4 "> {/* เพิ่มระยะห่างและความชิดซ้ายเมื่อในจอใหญ่ */}
                                     <Link href="/summary" passHref={true} legacyBehavior>
-                                        <a className="bg-blue text-white px-3 py-1 rounded">Summarize</a>
+                                        <a className="bg-blue text-white px-3 py-1 rounded mr-1">Summarize</a>
                                     </Link>
                                     <button
-                                        className="bg-red text-white px-3 py-1 rounded"
+                                        className="bg-red text-white px-3 py-1 rounded md:mt-1"
                                         onClick={() => handleDelete(index)} // Call the delete function on click
                                     >
                                         Delete <MdDelete className="inline-block ml-1" />
